@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>資産運用シミュレーター</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+
+<!-- iOSホーム画面追加対応 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="資産運用シム">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 text-slate-100">
+
+<header class="border-b border-slate-800 bg-slate-950/60 backdrop-blur sticky top-0 z-20">
+  <div class="max-w-6xl mx-auto px-4 py-5">
+    <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+      資産運用シミュレーター
+    </h1>
+    <p class="text-slate-400 text-sm mt-1">積立・取り崩しをリアルタイムにシミュレーション</p>
+  </div>
+
+  <nav class="max-w-6xl mx-auto px-4 pb-4 flex flex-wrap gap-2" id="tab-nav">
+    <button class="tab-btn" data-tab="future">将来の運用資産額</button>
+    <button class="tab-btn" data-tab="monthly">毎月の積立金額</button>
+    <button class="tab-btn" data-tab="period">積立期間</button>
+    <button class="tab-btn" data-tab="initial">初期投資額</button>
+    <button class="tab-btn" data-tab="withdraw">取り崩しシミュレーション</button>
+  </nav>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+  <!-- ===================== 1. 将来の運用資産額 ===================== -->
+  <section class="tab-panel" id="panel-future" data-report-title="将来の運用資産額 シミュレーション結果">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="card-title">入力条件</h2>
+
+        <div class="field">
+          <label for="future-initial">初期投資額（円）</label>
+          <div class="field-row">
+            <input type="range" id="future-initial-range" min="0" max="10000000" step="10000" value="1000000">
+            <input type="text" inputmode="numeric" class="input-num" id="future-initial-num" min="0" max="100000000" step="10000" value="1000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="future-monthly">毎月積立額（円）</label>
+          <div class="field-row">
+            <input type="range" id="future-monthly-range" min="0" max="500000" step="1000" value="30000">
+            <input type="text" inputmode="numeric" class="input-num" id="future-monthly-num" min="0" max="10000000" step="1000" value="30000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="future-rate">想定利回り（年率 %）</label>
+          <div class="field-row">
+            <input type="range" id="future-rate-range" min="0" max="15" step="0.1" value="5">
+            <input type="text" inputmode="numeric" class="input-num" id="future-rate-num" min="0" max="50" step="0.1" value="5">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="future-years">積立期間（年）</label>
+          <div class="field-row">
+            <input type="range" id="future-years-range" min="1" max="50" step="1" value="20">
+            <input type="text" inputmode="numeric" class="input-num" id="future-years-num" min="1" max="100" step="1" value="20">
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row"><span>将来の運用資産額</span><strong id="future-result-total">-</strong></div>
+          <div class="result-row"><span>元本合計</span><strong id="future-result-principal">-</strong></div>
+          <div class="result-row"><span>運用益</span><strong id="future-result-profit">-</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">資産推移グラフ</h2>
+        <div class="chart-wrap"><canvas id="chart-future"></canvas></div>
+        <div class="download-row">
+          <button class="btn-download" data-action="png" data-target="future">グラフをPNG保存</button>
+          <button class="btn-download" data-action="pdf" data-target="future">レポートをPDF保存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. 毎月の積立金額 ===================== -->
+  <section class="tab-panel hidden" id="panel-monthly" data-report-title="毎月の積立金額 シミュレーション結果">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="card-title">入力条件</h2>
+
+        <div class="field">
+          <label for="monthly-target">目標金額（円）</label>
+          <div class="field-row">
+            <input type="range" id="monthly-target-range" min="100000" max="100000000" step="100000" value="20000000">
+            <input type="text" inputmode="numeric" class="input-num" id="monthly-target-num" min="0" max="1000000000" step="100000" value="20000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="monthly-initial">初期投資額（円）</label>
+          <div class="field-row">
+            <input type="range" id="monthly-initial-range" min="0" max="10000000" step="10000" value="0">
+            <input type="text" inputmode="numeric" class="input-num" id="monthly-initial-num" min="0" max="100000000" step="10000" value="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="monthly-rate">想定利回り（年率 %）</label>
+          <div class="field-row">
+            <input type="range" id="monthly-rate-range" min="0" max="15" step="0.1" value="5">
+            <input type="text" inputmode="numeric" class="input-num" id="monthly-rate-num" min="0" max="50" step="0.1" value="5">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="monthly-years">積立期間（年）</label>
+          <div class="field-row">
+            <input type="range" id="monthly-years-range" min="1" max="50" step="1" value="20">
+            <input type="text" inputmode="numeric" class="input-num" id="monthly-years-num" min="1" max="100" step="1" value="20">
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row"><span>必要毎月積立額</span><strong id="monthly-result-pmt">-</strong></div>
+          <div class="result-row"><span>元本合計</span><strong id="monthly-result-principal">-</strong></div>
+          <div class="result-row"><span>運用益</span><strong id="monthly-result-profit">-</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">資産推移グラフ</h2>
+        <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+        <div class="download-row">
+          <button class="btn-download" data-action="png" data-target="monthly">グラフをPNG保存</button>
+          <button class="btn-download" data-action="pdf" data-target="monthly">レポートをPDF保存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. 積立期間 ===================== -->
+  <section class="tab-panel hidden" id="panel-period" data-report-title="積立期間 シミュレーション結果">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="card-title">入力条件</h2>
+
+        <div class="field">
+          <label for="period-target">目標金額（円）</label>
+          <div class="field-row">
+            <input type="range" id="period-target-range" min="100000" max="100000000" step="100000" value="20000000">
+            <input type="text" inputmode="numeric" class="input-num" id="period-target-num" min="0" max="1000000000" step="100000" value="20000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="period-initial">初期投資額（円）</label>
+          <div class="field-row">
+            <input type="range" id="period-initial-range" min="0" max="10000000" step="10000" value="1000000">
+            <input type="text" inputmode="numeric" class="input-num" id="period-initial-num" min="0" max="100000000" step="10000" value="1000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="period-monthly">毎月積立額（円）</label>
+          <div class="field-row">
+            <input type="range" id="period-monthly-range" min="1000" max="500000" step="1000" value="30000">
+            <input type="text" inputmode="numeric" class="input-num" id="period-monthly-num" min="0" max="10000000" step="1000" value="30000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="period-rate">想定利回り（年率 %）</label>
+          <div class="field-row">
+            <input type="range" id="period-rate-range" min="0" max="15" step="0.1" value="5">
+            <input type="text" inputmode="numeric" class="input-num" id="period-rate-num" min="0" max="50" step="0.1" value="5">
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row"><span>必要積立期間</span><strong id="period-result-years">-</strong></div>
+          <div class="result-row"><span>元本合計</span><strong id="period-result-principal">-</strong></div>
+          <div class="result-row"><span>運用益</span><strong id="period-result-profit">-</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">資産推移グラフ</h2>
+        <div class="chart-wrap"><canvas id="chart-period"></canvas></div>
+        <div class="download-row">
+          <button class="btn-download" data-action="png" data-target="period">グラフをPNG保存</button>
+          <button class="btn-download" data-action="pdf" data-target="period">レポートをPDF保存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. 初期投資額 ===================== -->
+  <section class="tab-panel hidden" id="panel-initial" data-report-title="初期投資額 シミュレーション結果">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="card-title">入力条件</h2>
+
+        <div class="field">
+          <label for="initial-target">目標金額（円）</label>
+          <div class="field-row">
+            <input type="range" id="initial-target-range" min="100000" max="100000000" step="100000" value="20000000">
+            <input type="text" inputmode="numeric" class="input-num" id="initial-target-num" min="0" max="1000000000" step="100000" value="20000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="initial-monthly">毎月積立額（円）</label>
+          <div class="field-row">
+            <input type="range" id="initial-monthly-range" min="0" max="500000" step="1000" value="30000">
+            <input type="text" inputmode="numeric" class="input-num" id="initial-monthly-num" min="0" max="10000000" step="1000" value="30000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="initial-rate">想定利回り（年率 %）</label>
+          <div class="field-row">
+            <input type="range" id="initial-rate-range" min="0" max="15" step="0.1" value="5">
+            <input type="text" inputmode="numeric" class="input-num" id="initial-rate-num" min="0" max="50" step="0.1" value="5">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="initial-years">積立期間（年）</label>
+          <div class="field-row">
+            <input type="range" id="initial-years-range" min="1" max="50" step="1" value="20">
+            <input type="text" inputmode="numeric" class="input-num" id="initial-years-num" min="1" max="100" step="1" value="20">
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row"><span>必要初期投資額</span><strong id="initial-result-p0">-</strong></div>
+          <div class="result-row"><span>元本合計</span><strong id="initial-result-principal">-</strong></div>
+          <div class="result-row"><span>運用益</span><strong id="initial-result-profit">-</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">資産推移グラフ</h2>
+        <div class="chart-wrap"><canvas id="chart-initial"></canvas></div>
+        <div class="download-row">
+          <button class="btn-download" data-action="png" data-target="initial">グラフをPNG保存</button>
+          <button class="btn-download" data-action="pdf" data-target="initial">レポートをPDF保存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. 取り崩しシミュレーション ===================== -->
+  <section class="tab-panel hidden" id="panel-withdraw" data-report-title="取り崩しシミュレーション結果">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="card-title">入力条件</h2>
+
+        <div class="flex gap-2 mb-5" id="withdraw-mode-toggle">
+          <button class="mode-btn" data-mode="period">期間算出</button>
+          <button class="mode-btn" data-mode="amount">金額算出</button>
+        </div>
+
+        <div class="field">
+          <label for="withdraw-balance">取り崩し開始時の資産額（円）</label>
+          <div class="field-row">
+            <input type="range" id="withdraw-balance-range" min="100000" max="100000000" step="100000" value="20000000">
+            <input type="text" inputmode="numeric" class="input-num" id="withdraw-balance-num" min="0" max="1000000000" step="100000" value="20000000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="withdraw-rate">運用しながらの想定利回り（年率 %）</label>
+          <div class="field-row">
+            <input type="range" id="withdraw-rate-range" min="0" max="15" step="0.1" value="3">
+            <input type="text" inputmode="numeric" class="input-num" id="withdraw-rate-num" min="0" max="50" step="0.1" value="3">
+          </div>
+        </div>
+
+        <div class="field" id="withdraw-field-monthly">
+          <label for="withdraw-monthly">毎月の取り崩し額（円）</label>
+          <div class="field-row">
+            <input type="range" id="withdraw-monthly-range" min="1000" max="1000000" step="1000" value="100000">
+            <input type="text" inputmode="numeric" class="input-num" id="withdraw-monthly-num" min="0" max="10000000" step="1000" value="100000">
+          </div>
+        </div>
+
+        <div class="field hidden" id="withdraw-field-years">
+          <label for="withdraw-years">取り崩し期間（年）</label>
+          <div class="field-row">
+            <input type="range" id="withdraw-years-range" min="1" max="50" step="1" value="20">
+            <input type="text" inputmode="numeric" class="input-num" id="withdraw-years-num" min="1" max="100" step="1" value="20">
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row" id="withdraw-result-row-period"><span>資産が尽きるまでの期間</span><strong id="withdraw-result-period">-</strong></div>
+          <div class="result-row hidden" id="withdraw-result-row-amount"><span>毎月の取り崩し可能額</span><strong id="withdraw-result-amount">-</strong></div>
+          <div class="result-row"><span>累計取り崩し額</span><strong id="withdraw-result-total">-</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">資産残高推移グラフ</h2>
+        <div class="chart-wrap"><canvas id="chart-withdraw"></canvas></div>
+        <div class="download-row">
+          <button class="btn-download" data-action="png" data-target="withdraw">グラフをPNG保存</button>
+          <button class="btn-download" data-action="pdf" data-target="withdraw">レポートをPDF保存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="max-w-6xl mx-auto px-4 pb-10 text-slate-500 text-xs">
+  ※本シミュレーションは概算値です。実際の運用成果を保証するものではありません。
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

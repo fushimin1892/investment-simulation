@@ -1,0 +1,163 @@
+/* ===== タブメニュー ===== */
+.tab-btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.tab-btn:hover {
+  color: #ffffff;
+  border-color: #10b981;
+}
+.tab-btn.active {
+  background: #10b981;
+  color: #062f24;
+  border-color: #10b981;
+}
+
+/* ===== カード ===== */
+.card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.5);
+}
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #34d399;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.01em;
+}
+
+/* ===== 入力フィールド ===== */
+.field {
+  margin-bottom: 1.4rem;
+}
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin-bottom: 0.45rem;
+}
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.field-row input[type="range"] {
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: 9999px;
+  background: #1e293b;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+.field-row .input-num {
+  width: 8.5rem;
+  flex: 0 0 auto;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  text-align: right;
+}
+.field-row .input-num:focus,
+.field-row input[type="range"]:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* ===== 結果ボックス ===== */
+.result-box {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 0.85rem;
+  padding: 1.1rem 1.25rem;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.2);
+}
+.result-row:last-child {
+  border-bottom: none;
+}
+.result-row span {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+.result-row strong {
+  color: #34d399;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* ===== グラフ ===== */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+}
+
+/* ===== ダウンロードボタン ===== */
+.download-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.btn-download {
+  flex: 1 1 auto;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #062f24;
+  background: #34d399;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.btn-download:hover {
+  filter: brightness(1.08);
+}
+.btn-download:active {
+  filter: brightness(0.95);
+}
+
+/* ===== 取り崩しモード切替 ===== */
+.mode-btn {
+  flex: 1 1 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  cursor: pointer;
+}
+.mode-btn.active {
+  background: #10b981;
+  color: #062f24;
+  border-color: #10b981;
+}
+
+/* ===== 印刷/PDFキャプチャ用調整 ===== */
+.report-capture {
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
