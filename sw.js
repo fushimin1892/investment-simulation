@@ -3,14 +3,14 @@
 /* PWAオフラインキャッシュ用Service Worker。CDNのURLはCLAUDE.mdの方針通りバージョン固定のため、
    イミュータブルとみなしキャッシュ対象に含める。 */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `asset-sim-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css",
-  "./script.js",
+  "./css/style.css",
+  "./js/script.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
