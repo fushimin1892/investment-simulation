@@ -4,6 +4,10 @@
 
 公開先: https://fushimin1892.github.io/investment-simulation/
 
+## 開発時の確認
+
+リポジトリのルートで `python -m http.server 8000` を実行し、ブラウザで `http://localhost:8000/` を開きます。終了は Ctrl+C です。キャッシュに以前の画面が残る場合は、ブラウザのサービスワーカーも確認してください。
+
 ## ファイル構成
 
 - `index.html` — 画面と外部ライブラリの読み込み
